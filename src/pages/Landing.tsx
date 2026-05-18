@@ -67,6 +67,7 @@ export function Landing() {
         <p className="text-text-dim text-xs">
           OpCore is an unofficial fan-made tool. Star Citizen® is © Cloud Imperium Rights LLC.
         </p>
+        <p className="text-text-dim text-xs">v0.4 · build 2026-05-18</p>
       </div>
     </div>
   )

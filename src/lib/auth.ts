@@ -1,9 +1,12 @@
 import {
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type User,
+  type AuthError,
 } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
@@ -12,7 +15,20 @@ import { auth, db } from '../firebase'
 const provider = new GoogleAuthProvider()
 
 export async function signInWithGoogle(): Promise<void> {
-  await signInWithRedirect(auth, provider)
+  try {
+    await signInWithPopup(auth, provider)
+  } catch (e) {
+    const code = (e as AuthError)?.code
+    if (
+      code === 'auth/popup-blocked' ||
+      code === 'auth/cancelled-popup-request' ||
+      code === 'auth/operation-not-supported-in-this-environment'
+    ) {
+      await signInWithRedirect(auth, provider)
+    } else {
+      throw e
+    }
+  }
 }
 
 export async function signOut(): Promise<void> {
@@ -38,11 +54,23 @@ async function ensureUserDoc(user: User): Promise<void> {
   }
 }
 
+// Race getRedirectResult against a 4s timeout so iOS never hangs
+function safeGetRedirectResult() {
+  return Promise.race([
+    getRedirectResult(auth),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
+  ])
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    safeGetRedirectResult()
+      .then((result) => { if (result?.user) ensureUserDoc(result.user) })
+      .catch(() => {})
+
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)
