@@ -1,4 +1,13 @@
-import { GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, type User } from 'firebase/auth'
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  type User,
+  type AuthError,
+} from 'firebase/auth'
 import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { auth, db } from '../firebase'
@@ -6,8 +15,17 @@ import { auth, db } from '../firebase'
 const provider = new GoogleAuthProvider()
 
 export async function signInWithGoogle(): Promise<void> {
-  const result = await signInWithPopup(auth, provider)
-  await ensureUserDoc(result.user)
+  try {
+    await signInWithPopup(auth, provider)
+  } catch (e) {
+    const code = (e as AuthError)?.code
+    // Safari / mobile blocks popups — fall back to redirect
+    if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+      await signInWithRedirect(auth, provider)
+    } else {
+      throw e
+    }
+  }
 }
 
 export async function signOut(): Promise<void> {
@@ -26,6 +44,7 @@ async function ensureUserDoc(user: User): Promise<void> {
       createdAt: serverTimestamp(),
       lastSeenAt: serverTimestamp(),
       handle: null,
+      sessionCodes: [],
     })
   } else {
     await setDoc(ref, { lastSeenAt: serverTimestamp() }, { merge: true })
@@ -37,6 +56,11 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Handle result from signInWithRedirect (mobile fallback)
+    getRedirectResult(auth)
+      .then((result) => { if (result?.user) ensureUserDoc(result.user) })
+      .catch(() => {})
+
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)

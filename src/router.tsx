@@ -10,6 +10,7 @@ import { Refinery } from './pages/Refinery'
 import { Toolbox } from './pages/Toolbox'
 import { History } from './pages/History'
 import { Settings } from './pages/Settings'
+import { SessionView } from './pages/SessionView'
 import { useAuth } from './lib/auth'
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -54,6 +55,7 @@ export function Router() {
         >
           <Route path="/" element={<Dashboard />} />
           <Route path="/mining" element={<MiningOps />} />
+          <Route path="/session/:code" element={<SessionView />} />
           <Route path="/salvage" element={<SalvageOps />} />
           <Route path="/logistics" element={<Logistics />} />
           <Route path="/hangar" element={<Hangar />} />
