@@ -1,11 +1,9 @@
 import {
   GoogleAuthProvider,
-  signInWithPopup,
   signInWithRedirect,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type User,
-  type AuthError,
 } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
@@ -14,17 +12,7 @@ import { auth, db } from '../firebase'
 const provider = new GoogleAuthProvider()
 
 export async function signInWithGoogle(): Promise<void> {
-  try {
-    await signInWithPopup(auth, provider)
-  } catch (e) {
-    const code = (e as AuthError)?.code
-    // Safari / mobile blocks popups — fall back to redirect
-    if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
-      await signInWithRedirect(auth, provider)
-    } else {
-      throw e
-    }
-  }
+  await signInWithRedirect(auth, provider)
 }
 
 export async function signOut(): Promise<void> {

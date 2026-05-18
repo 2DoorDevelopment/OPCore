@@ -11,6 +11,7 @@ export function Landing() {
     setError(null)
     try {
       await signInWithGoogle()
+      // signInWithRedirect navigates away — loading state stays true intentionally
     } catch {
       setError('Sign-in failed. Please try again.')
       setLoading(false)
