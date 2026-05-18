@@ -19,7 +19,7 @@ React 18 + TypeScript · Vite 5 · Tailwind CSS · Zustand · Firebase Auth + Fi
 
 ## Setup
 
-1. Create a Firebase project, enable Google Auth and Firestore. Paste security rules from `opcore-spec.md §10`.
+1. Create a Firebase project, enable Google Auth and Firestore, and add your deployment host (for GitHub Pages: `2doordevelopment.github.io`) to Firebase Auth authorized domains. Paste security rules from `opcore-spec.md §10`.
 2. Copy your Firebase config into `.env.local` (see `.env.example`).
 3. Create a free UEX Corp account and generate an API token — you'll paste it into OpCore Settings on first run.
 4. `npm install && npm run dev`
