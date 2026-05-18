@@ -2,7 +2,6 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
-  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type User,
@@ -56,11 +55,6 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Handle result from signInWithRedirect (mobile fallback)
-    getRedirectResult(auth)
-      .then((result) => { if (result?.user) ensureUserDoc(result.user) })
-      .catch(() => {})
-
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)
