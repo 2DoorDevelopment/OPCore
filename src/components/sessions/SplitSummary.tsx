@@ -1,15 +1,15 @@
 import { calculateSplits, totalSaleValue } from '../../lib/splits'
-import type { Session, SessionMember, RockEntry } from '../../types'
+import type { Session, SessionMember, SplitEntry } from '../../types'
 
 interface SplitSummaryProps {
   session: Session
   members: SessionMember[]
-  rocks: RockEntry[]
+  entries: SplitEntry[]
 }
 
-export function SplitSummary({ session, members, rocks }: SplitSummaryProps) {
-  const total = totalSaleValue(rocks)
-  const splits = calculateSplits(session, members, rocks)
+export function SplitSummary({ session, members, entries }: SplitSummaryProps) {
+  const total = totalSaleValue(entries)
+  const splits = calculateSplits(session, members, entries)
 
   return (
     <div className="space-y-4">
@@ -36,7 +36,7 @@ export function SplitSummary({ session, members, rocks }: SplitSummaryProps) {
       )}
       {total === 0 && (
         <p className="text-text-dim text-xs text-center pt-2">
-          Mark rocks as sold and add sale values to see splits.
+          Mark entries as sold and add sale values to see splits.
         </p>
       )}
     </div>

@@ -1,7 +1,7 @@
-import type { RockEntry, SessionMember, Session } from '../types'
+import type { SessionMember, Session, SplitEntry } from '../types'
 
-export function totalSaleValue(rocks: RockEntry[]): number {
-  return rocks.reduce((sum, r) => sum + (r.finalSaleValue ?? 0), 0)
+export function totalSaleValue(entries: SplitEntry[]): number {
+  return entries.reduce((sum, e) => sum + (e.finalSaleValue ?? 0), 0)
 }
 
 function equalSplit(total: number, members: SessionMember[]): Record<string, number> {
@@ -13,26 +13,26 @@ function equalSplit(total: number, members: SessionMember[]): Record<string, num
 function contributionSplit(
   total: number,
   members: SessionMember[],
-  rocks: RockEntry[],
+  entries: SplitEntry[],
 ): Record<string, number> {
   const counts: Record<string, number> = Object.fromEntries(members.map((m) => [m.uid, 0]))
-  for (const rock of rocks) {
-    if (rock.createdBy in counts) counts[rock.createdBy]++
+  for (const e of entries) {
+    if (e.createdBy in counts) counts[e.createdBy]++
   }
-  const totalRocks = Object.values(counts).reduce((a, b) => a + b, 0)
-  if (totalRocks === 0) return equalSplit(total, members)
+  const totalEntries = Object.values(counts).reduce((a, b) => a + b, 0)
+  if (totalEntries === 0) return equalSplit(total, members)
   return Object.fromEntries(
-    Object.entries(counts).map(([uid, count]) => [uid, Math.floor(total * (count / totalRocks))])
+    Object.entries(counts).map(([uid, count]) => [uid, Math.floor(total * (count / totalEntries))])
   )
 }
 
 export function calculateSplits(
   session: Pick<Session, 'splitMode' | 'customSplits'>,
   members: SessionMember[],
-  rocks: RockEntry[],
+  entries: SplitEntry[],
 ): Record<string, number> {
-  const total = totalSaleValue(rocks)
-  if (session.splitMode === 'contribution') return contributionSplit(total, members, rocks)
+  const total = totalSaleValue(entries)
+  if (session.splitMode === 'contribution') return contributionSplit(total, members, entries)
   if (session.splitMode === 'custom' && session.customSplits) {
     return Object.fromEntries(
       Object.entries(session.customSplits).map(([uid, pct]) => [uid, Math.floor((total * pct) / 100)])
