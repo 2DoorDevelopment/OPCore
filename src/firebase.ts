@@ -11,6 +11,19 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
+const requiredFirebaseConfigEntries = [
+  ['apiKey', firebaseConfig.apiKey],
+  ['authDomain', firebaseConfig.authDomain],
+  ['projectId', firebaseConfig.projectId],
+  ['appId', firebaseConfig.appId],
+] as const
+
+export function getFirebaseConfigIssues(): string[] {
+  return requiredFirebaseConfigEntries
+    .filter(([, value]) => typeof value !== 'string' || value.trim().length === 0)
+    .map(([key]) => key)
+}
+
 const app = initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)

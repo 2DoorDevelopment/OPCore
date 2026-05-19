@@ -1,10 +1,15 @@
-import { useState } from 'react'
-import { signInWithGoogle } from '../lib/auth'
+import { useEffect, useState } from 'react'
+import { consumeLastAuthError, getAuthErrorMessage, signInWithGoogle } from '../lib/auth'
 import { Button } from '../components/ui/Button'
 
 export function Landing() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const redirectError = consumeLastAuthError()
+    if (redirectError) setError(redirectError)
+  }, [])
 
   async function handleSignIn() {
     setLoading(true)
@@ -12,8 +17,8 @@ export function Landing() {
     try {
       await signInWithGoogle()
       // signInWithRedirect navigates away — loading state stays true intentionally
-    } catch {
-      setError('Sign-in failed. Please try again.')
+    } catch (e) {
+      setError(getAuthErrorMessage(e))
       setLoading(false)
     }
   }
@@ -60,7 +65,7 @@ export function Landing() {
           </Button>
 
           {error && (
-            <p className="text-danger text-sm">{error}</p>
+            <p className="text-danger text-sm whitespace-pre-wrap">{error}</p>
           )}
         </div>
 
